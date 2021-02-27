@@ -6,7 +6,7 @@ import torch.nn.functional as F
 class Embedding(torch.nn.Module):
     def __init__(self, vocab_size, embedding_dim):
         super(Embedding, self).__init__()
-        self.weights = torch.randn((vocab_size, embedding_dim), requires_grad=True).cuda()
+        self.weights = torch.randn((vocab_size, embedding_dim), requires_grad=True)
 
     def forward(self, mask):
         if mask.ndim == 2:
@@ -48,3 +48,10 @@ class ClassifierModel(torch.nn.Module):
         out, _ = self.lstm(embedding_out)
         fc1 = F.relu(self.fc1(out.reshape(x.shape[0], -1)))
         return self.fc2(fc1)
+
+    def loss(self, x, target):
+
+        logits = self(x)
+
+        return loss_fn(logits, target)
+    	
