@@ -9,11 +9,12 @@ class Embedding(torch.nn.Module):
         self.weights = torch.randn((vocab_size, embedding_dim), requires_grad=True)
 
     def forward(self, mask):
-        if mask.ndim == 2:
-            assert mask.dtype == torch.long
-            return self.weights[mask]
+#         if mask.ndim == 2:
+#             assert mask.dtype == torch.long
+#             return self.weights[mask]
         
-        assert mask.dtype == torch.float
+#         assert mask.dtype == torch.float
+
         # here the mask is the one-hot encoding
         return torch.matmul(mask, self.weights)
 
