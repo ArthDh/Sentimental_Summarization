@@ -3,13 +3,11 @@ import torch.autograd
 from torch.autograd import Variable
 import torch.nn.functional as F
 
-
-class Embedding(torch.nn.Module):
+class Embedding_(torch.nn.Module):
     def __init__(self, vocab_size, embedding_dim):
-        super(Embedding, self).__init__()
-        self.weights = torch.randn((vocab_size, embedding_dim), requires_grad=True).cuda()
-
-        self.embedding = torch.nn.Embedding.from_pretrained(self.weight)
+        super(Embedding_, self).__init__()
+        
+        self.embedding = torch.nn.Embedding.from_pretrained(self.weights)
 
     def forward(self, mask):
         if mask.ndim == 2:
@@ -18,7 +16,7 @@ class Embedding(torch.nn.Module):
         
         assert mask.dtype == torch.float
         # here the mask is the one-hot encoding
-        return torch.matmul(mask, self.weights)
+        return torch.matmul(mask, self.embedding.weight)
 
 class ClassifierModel(torch.nn.Module):
     def __init__(self, 
@@ -33,7 +31,7 @@ class ClassifierModel(torch.nn.Module):
                 ):
         super(ClassifierModel, self).__init__()
         self.vocab_size = vocab_size
-        self.embedding = Embedding(vocab_size, embedding_dim).requires_grad_()
+        self.embedding = Embedding_(vocab_size, embedding_dim).requires_grad_()
         self.lstm = torch.nn.LSTM(
             embedding_dim,
             hidden_size,
@@ -42,8 +40,9 @@ class ClassifierModel(torch.nn.Module):
             batch_first=batch_first,
         )
         
-        self.fc1 = torch.nn.Linear(hidden_size*seq_length, 32)
-        self.fc2 = torch.nn.Linear(32, out_dim)
+        fc_hidden = 32
+        self.fc1 = torch.nn.Linear(hidden_size*seq_length, fc_hidden)
+        self.fc2 = torch.nn.Linear(fc_hidden, out_dim)
         
 
     def forward(self, x):
@@ -57,4 +56,3 @@ class ClassifierModel(torch.nn.Module):
         logits = self(x)
 
         return loss_fn(logits, target)
-    	
