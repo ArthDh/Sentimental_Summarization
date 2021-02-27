@@ -15,7 +15,10 @@ class MergeModel(torch.nn.Module):
         idx =  torch.argmax(self.summary_out.logits, dim=2, keepdims=  True)
         mask = torch.zeros_like(self.summary_out.logits).scatter_(2, idx, 1.)
         
-        pred_summary_id = (self.summary_out.logits * mask).sum(axis=2).long()
+        
+        pred_summary_id = torch.argmax(self.summary_out.logits, 2).float() + self.summary_out.logits - self.summary_out.logits.detach()
+        print(pred_summary_id.shape)
+#         pred_summary_id = (self.summary_out.logits * mask).sum(axis=2).long()
         pred_summary_mask = torch.ones_like(summary_mask).long()
         pred_summary_id[:, -1] = 2
         

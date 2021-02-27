@@ -27,7 +27,6 @@ class ClassifierModel(torch.nn.Module):
                  hidden_size,
                  dropout=0.5,
                  batch_first=True,
-                 seq_length = 150
                 ):
         super(ClassifierModel, self).__init__()
         self.vocab_size = vocab_size
@@ -40,8 +39,8 @@ class ClassifierModel(torch.nn.Module):
             batch_first=batch_first,
         )
         
-        fc_hidden = 32
-        self.fc1 = torch.nn.Linear(hidden_size*seq_length, fc_hidden)
+        fc_hidden = hidden_size//2
+        self.fc1 = torch.nn.Linear(hidden_size, fc_hidden)
         self.fc2 = torch.nn.Linear(fc_hidden, out_dim)
         
         self.loss_fn = torch.nn.CrossEntropyLoss()
@@ -49,7 +48,8 @@ class ClassifierModel(torch.nn.Module):
     def forward(self, x):
         embedding_out = self.embedding(x)
         out, _ = self.lstm(embedding_out)
-        fc1 = F.relu(self.fc1(out.reshape(x.shape[0], -1)))
+        out_summed = out.sum(axis=1)
+        fc1 = F.relu(self.fc1(out_summed.reshape(x.shape[0], -1)))
         return self.fc2(fc1)
 
     def loss(self, x, target):
