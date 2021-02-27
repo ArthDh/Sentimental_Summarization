@@ -7,7 +7,7 @@ class Embedding_(torch.nn.Module):
     def __init__(self, vocab_size, embedding_dim):
         super(Embedding_, self).__init__()
         
-        self.embedding = torch.nn.Embedding.from_pretrained(self.weights)
+        self.embedding = torch.nn.Embedding(vocab_size, embedding_dim)
 
     def forward(self, mask):
         if mask.ndim == 2:
