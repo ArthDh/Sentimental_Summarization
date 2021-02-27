@@ -11,6 +11,8 @@ class Embedding(torch.nn.Module):
         if mask.ndim == 2:
             assert mask.dtype == torch.long
             return self.weights[mask]
+        
+        assert mask.dtype == torch.float
         # here the mask is the one-hot encoding
         return torch.matmul(mask, self.weights)
 
