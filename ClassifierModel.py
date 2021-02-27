@@ -44,6 +44,7 @@ class ClassifierModel(torch.nn.Module):
         self.fc1 = torch.nn.Linear(hidden_size*seq_length, fc_hidden)
         self.fc2 = torch.nn.Linear(fc_hidden, out_dim)
         
+        self.loss_fn = torch.nn.CrossEntropyLoss()
 
     def forward(self, x):
         embedding_out = self.embedding(x)
@@ -55,4 +56,4 @@ class ClassifierModel(torch.nn.Module):
 
         logits = self(x)
 
-        return loss_fn(logits, target)
+        return self.loss_fn(logits, target)
