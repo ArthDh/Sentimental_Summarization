@@ -3,18 +3,20 @@ import torch.autograd
 from torch.autograd import Variable
 import torch.nn.functional as F
 
+
 class Embedding(torch.nn.Module):
     def __init__(self, vocab_size, embedding_dim):
         super(Embedding, self).__init__()
-        self.weights = torch.randn((vocab_size, embedding_dim), requires_grad=True)
+        self.weights = torch.randn((vocab_size, embedding_dim), requires_grad=True).cuda()
+
+        self.embedding = torch.nn.Embedding.from_pretrained(self.weight)
 
     def forward(self, mask):
-#         if mask.ndim == 2:
-#             assert mask.dtype == torch.long
-#             return self.weights[mask]
+        if mask.ndim == 2:
+            assert mask.dtype == torch.long
+            return self.embedding(mask)
         
-#         assert mask.dtype == torch.float
-
+        assert mask.dtype == torch.float
         # here the mask is the one-hot encoding
         return torch.matmul(mask, self.weights)
 
