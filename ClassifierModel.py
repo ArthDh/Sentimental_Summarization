@@ -6,12 +6,16 @@ import torch.nn.functional as F
 class Embedding(torch.nn.Module):
     def __init__(self, vocab_size, embedding_dim):
         super(Embedding, self).__init__()
-        self.weights = torch.randn((vocab_size, embedding_dim), requires_grad=True).to(0)
+        self.weights = torch.randn((vocab_size, embedding_dim), requires_grad=True).cuda()
 
     def forward(self, mask):
+        if mask.ndim == 2:
+            assert mask.dtype == torch.long
+            return self.weights[mask]
+        
+        assert mask.dtype == torch.float
         # here the mask is the one-hot encoding
-        return torch.matmul(mask.float(), self.weights)
-
+        return torch.matmul(mask, self.weights)
 
 class ClassifierModel(torch.nn.Module):
     def __init__(self, 
@@ -22,12 +26,10 @@ class ClassifierModel(torch.nn.Module):
                  hidden_size,
                  dropout=0.5,
                  batch_first=True,
-                 batch_size = 16,
                  seq_length = 150
                 ):
         super(ClassifierModel, self).__init__()
         self.vocab_size = vocab_size
-        self.batch_size = batch_size
         self.embedding = Embedding(vocab_size, embedding_dim).requires_grad_()
         self.lstm = torch.nn.LSTM(
             embedding_dim,
@@ -44,5 +46,5 @@ class ClassifierModel(torch.nn.Module):
     def forward(self, x):
         embedding_out = self.embedding(x)
         out, _ = self.lstm(embedding_out)
-        fc1 = F.relu(self.fc1(out.reshape(self.batch_size, -1)))
+        fc1 = F.relu(self.fc1(out.reshape(x.shape[0], -1)))
         return self.fc2(fc1)
