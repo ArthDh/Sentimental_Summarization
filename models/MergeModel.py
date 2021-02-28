@@ -12,9 +12,11 @@ class MergeModel(torch.nn.Module):
     def forward(self, article_id, article_mask, summary_id, summary_mask):
         self.summary_out = self.summary_model(article_id,  article_mask, summary_id, summary_mask)
        
-        prob_logits,_ = torch.max(self.summary_out.logits,-1)
+        idx = torch.argmax(self.summary_out.logits, dim=-1, keepdims= True)
+        
+        mask = torch.zeros_like(self.summary_out.logits).scatter_(-1, idx, 1.).float().detach() + self.summary_out.logits - self.summary_out.logits.detach()
 
-        self.article_sentiment = self.sentiment_model(self.summary_out.logits)
-        self.summary_sentiment = self.sentiment_model(self.summary_out.logits)
+        self.article_sentiment = self.sentiment_model(article_id)
+        self.summary_sentiment = self.sentiment_model(mask)
         
         return [self.summary_out, self.article_sentiment, self.summary_sentiment]
