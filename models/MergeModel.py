@@ -8,7 +8,8 @@ class MergeModel(torch.nn.Module):
         super(MergeModel, self).__init__()
         self.summary_model = summary_model
         self.sentiment_model = sentiment_model
-        if freeze_sentiment:
+        self.freeze_sentiment = freeze_sentiment
+        if self.freeze_sentiment:
             for param in self.sentiment_model.parameters():
                 param.requires_grad = False
     
