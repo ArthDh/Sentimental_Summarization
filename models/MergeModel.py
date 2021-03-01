@@ -4,10 +4,13 @@ class MergeModel(torch.nn.Module):
     '''
             Todo
     '''
-    def __init__(self, summary_model, sentiment_model):
+    def __init__(self, summary_model, sentiment_model, freeze_sentiment=False):
         super(MergeModel, self).__init__()
         self.summary_model = summary_model
         self.sentiment_model = sentiment_model
+        if freeze_sentiment:
+            for param in self.sentiment_model.parameters():
+                param.requires_grad = False
     
     def forward(self, article_id, article_mask, summary_id, summary_mask):
         self.summary_out = self.summary_model(article_id,  article_mask, summary_id, summary_mask)
