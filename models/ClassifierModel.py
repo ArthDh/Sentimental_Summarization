@@ -67,10 +67,3 @@ class ClassifierModel(torch.nn.Module):
         logits = self(x)
 
         return self.loss_fn(logits, target)
-
-    # new model for the definitions of gradients in architec.py 
-    def new(self):
-
-        model_new = ClassifierModel(self.vocab_size, self.embedding_dim, self.out_dim, self.n_layers, self.hidden_size).cuda()
-
-        return model_new
