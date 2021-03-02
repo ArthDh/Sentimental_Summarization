@@ -7,7 +7,7 @@ class Embedding_(torch.nn.Module):
     def __init__(self, vocab_size, embedding_dim):
         super(Embedding_, self).__init__()
         
-        self.embedding = torch.nn.Embedding(vocab_size, embedding_dim)
+        self.embedding = torch.nn.Embedding(vocab_size, embedding_dim).cuda()
 
     def forward(self, mask):
         if mask.ndim == 2:
@@ -26,10 +26,18 @@ class ClassifierModel(torch.nn.Module):
                  n_layers,
                  hidden_size,
                  dropout=0.5,
-                 batch_first=True,
+                 batch_first=True
                 ):
         super(ClassifierModel, self).__init__()
+
+        # hyper parameters
         self.vocab_size = vocab_size
+        self.embedding_dim = embedding_dim
+        self.out_dim = out_dim
+        self.n_layers = n_layers
+        self.hidden_size = hidden_size
+
+        # model functions
         self.embedding = Embedding_(vocab_size, embedding_dim).requires_grad_()
         self.lstm = torch.nn.LSTM(
             embedding_dim,
@@ -40,8 +48,10 @@ class ClassifierModel(torch.nn.Module):
         )
         
         fc_hidden = hidden_size//2
-        self.fc1 = torch.nn.Linear(hidden_size, fc_hidden)
-        self.fc2 = torch.nn.Linear(fc_hidden, out_dim)
+
+        self.fc1 = torch.nn.utils.weight_norm(torch.nn.Linear(hidden_size, fc_hidden), name='weight')
+        
+        self.fc2 = torch.nn.utils.weight_norm(torch.nn.Linear(fc_hidden, out_dim), name='weight')
         
         self.loss_fn = torch.nn.CrossEntropyLoss()
 
